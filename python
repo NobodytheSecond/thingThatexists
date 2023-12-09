@@ -1,0 +1,89 @@
+from cryptography.fernet import Fernet
+import json
+import getpass
+import os
+
+class PasswordManager:
+    def __init__(self, key_file="key.key", data_file="passwords.json"):
+        self.key_file = key_file
+        self.data_file = data_file
+        self.load_key()
+        self.load_data()
+
+    def load_key(self):
+        if os.path.exists(self.key_file):
+            with open(self.key_file, "rb") as key_file:
+                self.key = key_file.read()
+        else:
+            self.key = Fernet.generate_key()
+            with open(self.key_file, "wb") as key_file:
+                key_file.write(self.key)
+
+    def load_data(self):
+        try:
+            with open(self.data_file, "rb") as data_file:
+                encrypted_data = data_file.read()
+                if encrypted_data:
+                    cipher_suite = Fernet(self.key)
+                    decrypted_data = cipher_suite.decrypt(encrypted_data)
+                    self.passwords = json.loads(decrypted_data)
+                else:
+                    self.passwords = {}
+        except Exception as e:
+            print(f"Error loading data: {e}")
+            self.passwords = {}
+
+    def save_data(self):
+        try:
+            cipher_suite = Fernet(self.key)
+            encrypted_data = cipher_suite.encrypt(json.dumps(self.passwords).encode())
+            with open(self.data_file, "wb") as data_file:
+                data_file.write(encrypted_data)
+        except Exception as e:
+            print(f"Error saving data: {e}")
+
+    def add_password(self, service, username, password):
+        if service not in self.passwords:
+            self.passwords[service] = {"username": username, "password": password}
+            self.save_data()
+            print(f"Password for {service} added successfully.")
+        else:
+            print(f"Password for {service} already exists. Use update_password to modify.")
+
+    def update_password(self, service, password):
+        if service in self.passwords:
+            self.passwords[service]["password"] = password
+            self.save_data()
+            print(f"Password for {service} updated successfully.")
+        else:
+            print(f"Password for {service} does not exist. Use add_password to add.")
+
+    def get_password(self, service):
+        if service in self.passwords:
+            return self.passwords[service]
+        else:
+            return f"Password for {service} does not exist."
+
+if __name__ == "__main__":
+    password_manager = PasswordManager()
+
+    while True:
+        print("\nPassword Manager Menu:")
+        print("1. Add/Update Password")
+        print("2. Get Password")
+        print("3. Exit")
+        choice = input("Enter your choice (1/2/3): ")
+
+        if choice == "1":
+            service = input("Enter the service: ")
+            username = input("Enter the username: ")
+            password = getpass.getpass("Enter the password: ")
+            password_manager.add_password(service, username, password)
+        elif choice == "2":
+            service = input("Enter the service: ")
+            password_info = password_manager.get_password(service)
+            print(f"Username: {password_info['username']}\nPassword: {password_info['password']}")
+        elif choice == "3":
+            break
+        else:
+            print("Invalid choice. Please enter 1, 2, or 3.")
