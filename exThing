@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Password and Username Storage</title>
+  <script>
+    // Array to store usernames and passwords
+    var credentials = [];
+
+    function storeCredentials() {
+      var username = document.getElementById('username').value;
+      var password = document.getElementById('password').value;
+
+      if (username !== '' && password !== '') {
+        credentials.push({ username: username, password: password });
+        alert('Credentials stored successfully!');
+        // Clear the input fields after storing credentials
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+      } else {
+        alert('Please enter both username and password.');
+      }
+    }
+
+    function showCredentials() {
+      if (credentials.length === 0) {
+        alert('No credentials stored yet.');
+      } else {
+        var credentialsList = 'Stored Credentials:\n';
+        credentials.forEach(function (credential, index) {
+          credentialsList += `${index + 1}. Username: ${credential.username}, Password: ${credential.password}\n`;
+        });
+        alert(credentialsList);
+      }
+    }
+  </script>
+</head>
+<body>
+  <h1>Password and Username Storage</h1>
+  
+  <form>
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username"><br><br>
+    
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password"><br><br>
+    
+    <button type="button" onclick="storeCredentials()">Store Credentials</button>
+    <button type="button" onclick="showCredentials()">Show Stored Credentials</button>
+  </form>
+</body>
+</html>
