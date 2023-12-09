@@ -1,39 +1,68 @@
 <!DOCTYPE html>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <html>
-  <head>
-    <link rel="stylesheet" href="style.css">
-  </head>
-  <body>
-     <form action="action_page.php" style="border:1px solid #ccc">
-  <div class="container">
-    <h1>Sign Up</h1>
-    <p>Please fill in this form to create an account.</p>
-    <hr>
+<head>
+  <title>Password and Username Storage</title>
+  <script>
+    // Array to store usernames and passwords
+    var credentials = []
+    var storedUsernames = []
+    var storedPasswords = []
+    function storeCredentials() {
+      var username = document.getElementById('username').value;
+      var password = document.getElementById('password').value;
+      
+      if (username !== '' && password !== '') {
+        credentials.push({ username: username, password: password });
+        alert('Credentials stored successfully!');
+        for(term in credentials){
+          if(credentials.indexOf(term) % 2 == 0){
+            storedUsernames.push(term);
+          } else{
+            storedPasswords.push(term);
+          }
+        }
+        // Clear the input fields after storing credentials
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+      } else {
+        alert('Please enter both username and password.');
+      }
+    }
 
-    <label for="email"><b>Email</b></label>
-    <input type="text" placeholder="Enter Email" name="email" required>
-
-    <label for="psw"><b>Password</b></label>
-    <input type="password" placeholder="Enter Password" name="psw" required>
-
-    <label for="psw-repeat"><b>Repeat Password</b></label>
-    <input type="password" placeholder="Repeat Password" name="psw-repeat" required>
-
-    <label>
-      <input type="checkbox" checked="checked" name="remember" style="margin-bottom:15px"> Remember me
-    </label>
-
-    <p>By creating an account you agree to our <a href="#" style="color:dodgerblue">Terms & Privacy</a>.</p>
-
-    <div class="clearfix">
-      <button type="button" class="cancelbtn">Cancel</button>
-      <button type="submit" class="signupbtn">Sign Up</button>
-    </div>
-  </div>
-</form> 
-    <h1>hello</h1>
-    <div>working</div>
+    function showCredentials() {
+      if (credentials.length === 0) {
+        alert('No credentials stored yet.');
+      } else {
+        for(i = 0; i == credentials.length; i++){
+          var myDiv = document.getElementById("myDiv");
+          var newParagraph = document.createElement("p");
+          newParagraph.textContent = "This is a new paragraph added dynamically.";
+          myDiv.appendChild(newParagraph);
+        }
+        }
+        }
     
-  </body>
+              
+            
+  </script>
+</head>
+<body>
+  <h1>Password and Username Storage</h1>
+  
+  <form>
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username"><br><br>
+    
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password"><br><br>
+    
+    <button type="button" onclick="storeCredentials()">Store Credentials</button>
+    <button type="button" onclick="showCredentials()">Show Stored Credentials</button>
+    <button type="button" onclick="downloadCredentials()">Download Stored Credentials</button>
+  </form>
+  <h2>Stored Credentials</h2>
+  <div id="myDiv">
+
+  </div>
+</body>
 </html>
