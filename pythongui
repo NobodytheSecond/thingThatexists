@@ -1,0 +1,112 @@
+from tkinter import *
+from tkinter import messagebox
+from cryptography.fernet import Fernet
+import json
+import getpass
+
+class PasswordManager:
+    def __init__(self, key_file="key.key", data_file="passwords.json"):
+        self.key_file = key_file
+        self.data_file = data_file
+        self.load_key()
+        self.load_data()
+
+    def load_key(self):
+        if os.path.exists(self.key_file):
+            with open(self.key_file, "rb") as key_file:
+                self.key = key_file.read()
+        else:
+            self.key = Fernet.generate_key()
+            with open(self.key_file, "wb") as key_file:
+                key_file.write(self.key)
+
+    def load_data(self):
+        try:
+            with open(self.data_file, "rb") as data_file:
+                encrypted_data = data_file.read()
+                if encrypted_data:
+                    cipher_suite = Fernet(self.key)
+                    decrypted_data = cipher_suite.decrypt(encrypted_data)
+                    self.passwords = json.loads(decrypted_data)
+                else:
+                    self.passwords = {}
+        except Exception as e:
+            print(f"Error loading data: {e}")
+            self.passwords = {}
+
+    def save_data(self):
+        try:
+            cipher_suite = Fernet(self.key)
+            encrypted_data = cipher_suite.encrypt(json.dumps(self.passwords).encode())
+            with open(self.data_file, "wb") as data_file:
+                data_file.write(encrypted_data)
+        except Exception as e:
+            print(f"Error saving data: {e}")
+
+    def add_password(self, service, username, password):
+        if service not in self.passwords:
+            self.passwords[service] = {"username": username, "password": password}
+            self.save_data()
+            messagebox.showinfo("Success", f"Password for {service} added successfully.")
+        else:
+            messagebox.showwarning("Warning", f"Password for {service} already exists. Use update_password to modify.")
+
+    def update_password(self, service, password):
+        if service in self.passwords:
+            self.passwords[service]["password"] = password
+            self.save_data()
+            messagebox.showinfo("Success", f"Password for {service} updated successfully.")
+        else:
+            messagebox.showwarning("Warning", f"Password for {service} does not exist. Use add_password to add.")
+
+    def get_password(self, service):
+        if service in self.passwords:
+            return self.passwords[service]
+        else:
+            return f"Password for {service} does not exist."
+
+# GUI code
+class PasswordManagerGUI:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Password Manager")
+
+        self.password_manager = PasswordManager()
+
+        self.label = Label(master, text="Password Manager")
+        self.label.pack(pady=10)
+
+        self.entry_service = Entry(master, width=30)
+        self.entry_service.insert(0, "Service")
+        self.entry_service.pack(pady=5)
+
+        self.entry_username = Entry(master, width=30)
+        self.entry_username.insert(0, "Username")
+        self.entry_username.pack(pady=5)
+
+        self.entry_password = Entry(master, width=30, show="*")
+        self.entry_password.insert(0, "Password")
+        self.entry_password.pack(pady=5)
+
+        self.button_add = Button(master, text="Add/Update Password", command=self.add_update_password)
+        self.button_add.pack(pady=10)
+
+        self.button_get = Button(master, text="Get Password", command=self.get_password)
+        self.button_get.pack(pady=10)
+
+    def add_update_password(self):
+        service = self.entry_service.get()
+        username = self.entry_username.get()
+        password = self.entry_password.get()
+
+        self.password_manager.add_password(service, username, password)
+
+    def get_password(self):
+        service = self.entry_service.get()
+        password_info = self.password_manager.get_password(service)
+        messagebox.showinfo("Password Info", f"Username: {password_info['username']}\nPassword: {password_info['password']}")
+
+if __name__ == "__main__":
+    root = Tk()
+    app = PasswordManagerGUI(root)
+    root.mainloop()
