@@ -2,64 +2,6 @@
 <html>
 <head>
   <title>Password and Username Storage</title>
-  <script>
-    // Array to store usernames and passwords
-    var tru = 1
-    var done = 1
-    var countTwo = 0
-    var credentials = []
-    var storedUsernames = []
-    var storedPasswords = []
-    function storeCredentials() {
-      var username = document.getElementById('username').value;
-      var password = document.getElementById('password').value;
-      
-      if (username !== '' && password !== '') {
-        credentials.push({ username: username, password: password });
-        alert('Credentials stored successfully!');
-        for(term in credentials){
-          if(credentials.indexOf(term) % 2 == 0){
-            storedUsernames.push(term);
-          } else{
-            storedPasswords.push(term);
-          }
-        }
-        // Clear the input fields after storing credentials
-        document.getElementById('username').value = '';
-        document.getElementById('password').value = '';
-      } else {
-        alert('Please enter both username and password.');
-      }
-    }
-
-    function showCredentials() {
-      if (credentials.length === 0) {
-        alert('No credentials stored yet.');
-      } else {
-        var myDiv = document.getElementById("myDiv");
-        var newParagraph = document.createElement("p");
-        for(term in credentials){
-          if(tru == 1){
-          newParagraph.textContent = "Location:" + term;
-          myDiv.appendChild(newParagraph);
-          tru = -tru
-          } else if(tru == -1){
-          newParagraph.textContent = "Password:" + term;
-          myDiv.appendChild(newParagraph);
-          tru = -tru
-          }
-        if(countTwo >= credentials.length + 1){
-          myDiv.remove()
-        } else{
-          countTwo += 1
-        }
-        }
-        }
-        }
-    
-              
-            
-  </script>
 </head>
 <body>
   <h1>Password and Username Storage</h1>
@@ -72,12 +14,90 @@
     <input type="password" id="password" name="password"><br><br>
     
     <button type="button" onclick="storeCredentials()">Store Credentials</button>
-    <button type="button" onclick="showCredentials()">Show Stored Credentials</button>
+    <button type="button" onclick="showCredentials()">Show Stored Credentials</button><br><br>
     <button type="button" onclick="downloadCredentials()">Download Stored Credentials</button>
+    <button type="button" onclick="uploadCredentials()">Upload Downloaded Credentials</button>
+    <button type="button" onclick="hideCredentials()">Hide Displayed Credentials</button>
   </form>
   <h2>Stored Credentials</h2>
-  <div id="myDiv">
+  <div id="myDiv"></div>
 
-  </div>
+  <script>
+    var credentials = [];
+
+    function hideCredentials() {
+      myDiv.innerHTML = '';
+    }
+    function storeCredentials() {
+      var username = document.getElementById('username').value;
+      var password = document.getElementById('password').value;
+
+      if (username !== '' && password !== '') {
+        credentials.push({ username, password });
+        alert('Credentials stored successfully!');
+
+        // Clear the input fields after storing credentials
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+      } else {
+        alert('Please enter both username and password.');
+      }
+    }
+
+    function showCredentials() {
+      var myDiv = document.getElementById('myDiv');
+      myDiv.innerHTML = '';
+
+      if (credentials.length === 0) {
+        myDiv.textContent = 'No credentials stored yet.';
+      } else {
+        credentials.forEach(credential => {
+          var newParagraph = document.createElement('p');
+          newParagraph.textContent = 'Username: ' + credential.username + ', Password: ' + credential.password;
+          myDiv.appendChild(newParagraph);
+        });
+      }
+    }
+
+    function downloadCredentials() {
+      if (credentials.length === 0) {
+        alert('No credentials stored yet.');
+        return;
+      }
+
+      var content = JSON.stringify(credentials);
+      var myBlob = new Blob([content], { type: 'text/plain' });
+      var url = window.URL.createObjectURL(myBlob);
+      var anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = 'credentials.txt';
+      anchor.click();
+      window.URL.revokeObjectURL(url);
+    }
+
+    function uploadCredentials() {
+      var input = document.createElement('input');
+      input.type = 'file';
+
+      input.onchange = e => {
+        var file = e.target.files[0];
+        var reader = new FileReader();
+
+        reader.readAsText(file, 'UTF-8');
+        reader.onload = readerEvent => {
+          var content = readerEvent.target.result;
+          try {
+            var parsedCredentials = JSON.parse(content);
+            credentials = parsedCredentials;
+            alert('Credentials uploaded successfully!');
+          } catch (error) {
+            alert('Error parsing uploaded credentials.');
+          }
+        };
+      };
+
+      input.click();
+    }
+  </script>
 </body>
 </html>
