@@ -4,6 +4,9 @@
   <title>Password and Username Storage</title>
   <script>
     // Array to store usernames and passwords
+    var tru = 1
+    var done = 1
+    var countTwo = 0
     var credentials = []
     var storedUsernames = []
     var storedPasswords = []
@@ -33,11 +36,23 @@
       if (credentials.length === 0) {
         alert('No credentials stored yet.');
       } else {
-        for(i = 0; i == credentials.length; i++){
-          var myDiv = document.getElementById("myDiv");
-          var newParagraph = document.createElement("p");
-          newParagraph.textContent = "This is a new paragraph added dynamically.";
+        var myDiv = document.getElementById("myDiv");
+        var newParagraph = document.createElement("p");
+        for(term in credentials){
+          if(tru == 1){
+          newParagraph.textContent = "Location:" + term;
           myDiv.appendChild(newParagraph);
+          tru = -tru
+          } else if(tru == -1){
+          newParagraph.textContent = "Password:" + term;
+          myDiv.appendChild(newParagraph);
+          tru = -tru
+          }
+        if(countTwo >= credentials.length + 1){
+          myDiv.remove()
+        } else{
+          countTwo += 1
+        }
         }
         }
         }
